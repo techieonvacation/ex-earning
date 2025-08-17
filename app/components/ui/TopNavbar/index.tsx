@@ -145,47 +145,29 @@ export default function TopNavbar() {
       {/* Mobile Top Navbar */}
       <div
         className={`
-          fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 transition-all duration-500 ease-out
+          fixed top-0 left-0 right-0 z-40 bg-background border-b border-border/30 transition-all duration-500 ease-out
           ${
             isVisible
               ? "translate-y-0 opacity-100"
               : "-translate-y-full opacity-0"
           }
-          md:hidden shadow-sm
+          md:hidden
         `}
       >
         <div className="px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo Section */}
-            <div className="flex items-center">
-              <Link
-                href="/"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200"
-              >
-                {/* Book Icon */}
-                <div className="relative">
-                  <div className="w-6 h-8 bg-blue-600 rounded-sm flex items-center justify-center shadow-md">
-                    <span className="text-white text-xs font-bold">RICO</span>
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-blue-600 rounded-full shadow-sm"></div>
-                </div>
-                {/* Text */}
-                <div className="flex flex-col">
-                  <span className="text-blue-600 font-bold text-base leading-none">
-                    RICO
-                  </span>
-                  <span className="text-orange-500 font-bold text-base leading-none">
-                    STUDY
-                  </span>
-                </div>
-              </Link>
+            <div className="flex items-center gap-x-1">
+              <div className="w-3 h-3 bg-primary rounded-full" />
+              <div className="w-3 h-3 bg-accent rounded-full" />
+              <div className="w-3 h-3 bg-secondary rounded-full" />
             </div>
 
             {/* Mobile Actions */}
             <div className="flex items-center space-x-3">
               {/* Search Toggle Button */}
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={toggleMobileSearch}
                 className="w-10 h-10 rounded-full hover:bg-gray-100 transition-colors duration-200"
@@ -193,21 +175,25 @@ export default function TopNavbar() {
                 <LucideIcons.Search className="w-5 h-5 text-gray-600" />
               </Button>
 
-              {/* Contact Info - Compact */}
-              <div className="flex items-center space-x-2">
-                <div className="relative">
-                  <div className="w-5 h-5 border-2 border-gray-800 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
+              {/* Contact Section */}
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 group cursor-pointer">
+                  {/* Phone Icon */}
+                  <Image
+                    src="/images/icon/call.svg"
+                    alt="logo"
+                    width={40}
+                    height={40}
+                  />
+                  {/* Contact Text */}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-200">
+                      Call Us
+                    </span>
+                    <span className="text-sm font-semibold text-primary group-hover:text-primary transition-colors duration-200">
+                      +91 9006564092
+                    </span>
                   </div>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 border-2 border-gray-800 rounded-full"></div>
-                </div>
-                <div className="hidden sm:flex flex-col">
-                  <span className="text-xs font-medium text-gray-800">
-                    Call Us
-                  </span>
-                  <span className="text-xs font-semibold text-blue-600">
-                    +91 9006564092
-                  </span>
                 </div>
               </div>
             </div>

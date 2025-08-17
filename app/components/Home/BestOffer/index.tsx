@@ -19,6 +19,7 @@ import { useRef } from "react";
 interface TopDealSection {
   id: string;
   title: string;
+  highlight: string;
   subtitle: string;
   products: ProductCardProps[];
   viewAllLink: string;
@@ -28,7 +29,8 @@ interface TopDealSection {
 const topDealSections: TopDealSection[] = [
   {
     id: "trendingDeals",
-    title: "Top Viral Bundle🔥",
+    title: "Top Viral",
+    highlight: "Bundle",
     subtitle: "Most popular products with amazing discounts",
     viewAllLink: "/products/trending",
     products: [
@@ -268,23 +270,24 @@ const TopDealComponents: React.FC = () => {
             className="mb-20 relative"
           >
             {/* Section Header */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-4">
               <div className="flex-1">
                 <motion.h3
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="text-2xl lg:text-3xl font-bold text-foreground mb-2 font-dm-sans"
+                  className="title"
                 >
-                  {section.title}
+                  {section.title}{" "}
+                  <span className="highlight">{section.highlight}</span>
                 </motion.h3>
                 <motion.p
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-muted-foreground text-lg font-dm-sans"
+                  className="hidden sm:block text-muted-foreground text-sm md:text-base font-dm-sans"
                 >
                   {section.subtitle}
                 </motion.p>
@@ -295,6 +298,7 @@ const TopDealComponents: React.FC = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.3 }}
+                className="hidden sm:block"
               >
                 <Link href={section.viewAllLink}>
                   <Button

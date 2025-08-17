@@ -306,7 +306,7 @@ export default function Navbar({
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <Link href="/">
-              <h2 className="text-2xl font-bold text-primary font-dm-sans">
+              <h2 className="text-xl lg:text-2xl font-bold text-primary font-dm-sans">
                 Ex-Earning
               </h2>
               {/* <Image

@@ -536,7 +536,7 @@ const ProductCard: React.FC<ProductCardComponentProps> = ({
         </div>
 
         {/* Title */}
-        <h3 className="font-bold text-card-foreground text-lg line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-200">
+        <h3 className="font-bold font-urbanist text-card-foreground text-lg line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-200">
           {title}
         </h3>
 
