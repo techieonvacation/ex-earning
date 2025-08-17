@@ -471,9 +471,15 @@ export default function Navbar({
 
       {/* Dynamic Spacer for fixed header - adjusts based on TopNavbar visibility */}
       <div
-        className="transition-all duration-500 ease-out"
+        className="transition-all duration-500 ease-out lg:hidden"
         style={{
-          height: topNavbarVisible ? "120px" : "80px", // 64px (TopNavbar) + 56px (MainNavbar) when visible, just 80px when hidden
+          height: topNavbarVisible ? "135px" : "80px", // Mobile: 64px (TopNavbar) + 56px (MainNavbar) when visible, just 80px when hidden
+        }}
+      />
+      <div
+        className="transition-all duration-500 ease-out hidden lg:block"
+        style={{
+          height: topNavbarVisible ? "150px" : "80px", // Desktop: 64px (TopNavbar) + 56px (MainNavbar) when visible, just 80px when hidden
         }}
       />
     </>
