@@ -153,6 +153,61 @@ export default function MobileMenu({
             />
           </div>
 
+          {/* Mobile Quick Actions - Cart & Account */}
+          <div className="px-3 sm:px-4 py-3 border-b border-border/20 bg-muted/30">
+            <div className="flex items-center justify-between">
+              {/* Cart Summary */}
+              <div 
+                className="flex items-center space-x-2 sm:space-x-3 p-2 rounded-lg bg-background/80 hover:bg-background transition-all duration-200 cursor-pointer touch-manipulation active:bg-primary/10"
+                onClick={() => window.location.href = '/cart'}
+              >
+                <div className="relative">
+                  <LucideIcons.ShoppingCart className="h-5 w-5 text-primary" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium border border-background">
+                    3
+                  </span>
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-sm font-medium text-foreground">Cart</p>
+                  <p className="text-xs text-muted-foreground">$498.00</p>
+                </div>
+                <div className="sm:hidden">
+                  <p className="text-xs font-medium text-foreground">$498</p>
+                </div>
+              </div>
+
+              {/* Account Actions */}
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 touch-manipulation"
+                  onClick={() => {
+                    window.location.href = '/login';
+                    handleMenuItemClick();
+                  }}
+                >
+                  <LucideIcons.LogIn className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Sign In</span>
+                  <span className="xs:hidden">Login</span>
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm font-medium bg-primary hover:bg-primary/90 text-white transition-all duration-200 touch-manipulation"
+                  onClick={() => {
+                    window.location.href = '/register';
+                    handleMenuItemClick();
+                  }}
+                >
+                  <LucideIcons.UserPlus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Sign Up</span>
+                  <span className="xs:hidden">Join</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+
           {/* Mobile Menu Content - Scrollable */}
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             {/* Main Navigation Section */}
@@ -205,6 +260,55 @@ export default function MobileMenu({
                 </h3>
               </div>
               <div className="p-4 space-y-2">
+                {/* Cart Option */}
+                <div 
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-primary/5 transition-all duration-200 group active:bg-primary/10 cursor-pointer"
+                  onClick={() => {
+                    window.location.href = '/cart';
+                    handleMenuItemClick();
+                  }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <LucideIcons.ShoppingCart className="h-5 w-5 text-foreground group-hover:text-primary transition-colors duration-200" />
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium border border-background">
+                        3
+                      </span>
+                    </div>
+                    <span className="font-medium font-urbanist text-foreground group-hover:text-primary transition-colors duration-200">
+                      Shopping Cart
+                    </span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">$498.00</span>
+                </div>
+
+                {/* User Account Options */}
+                <div className="space-y-2">
+                  <div className="px-3 py-2">
+                    <p className="text-sm text-muted-foreground font-medium">Account</p>
+                  </div>
+                  <Link
+                    href="/login"
+                    onClick={handleMenuItemClick}
+                    className="flex items-center p-3 rounded-lg hover:bg-primary/5 transition-all duration-200 group active:bg-primary/10"
+                  >
+                    <LucideIcons.LogIn className="h-5 w-5 text-foreground group-hover:text-primary transition-colors duration-200 mr-3" />
+                    <span className="font-medium font-urbanist text-foreground group-hover:text-primary transition-colors duration-200">
+                      Sign In
+                    </span>
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={handleMenuItemClick}
+                    className="flex items-center p-3 rounded-lg hover:bg-primary/5 transition-all duration-200 group active:bg-primary/10"
+                  >
+                    <LucideIcons.UserPlus className="h-5 w-5 text-foreground group-hover:text-primary transition-colors duration-200 mr-3" />
+                    <span className="font-medium font-urbanist text-foreground group-hover:text-primary transition-colors duration-200">
+                      Sign Up
+                    </span>
+                  </Link>
+                </div>
+
                 <Link
                   href="/portfolio"
                   onClick={handleMenuItemClick}

@@ -5,6 +5,7 @@ import { ThemeProvider } from "./lib/theme-provider";
 import { inter, dmSans, spaceGrotesk, urbanist } from "./lib/fonts";
 import ConditionalFooter from "./components/ConditionalFooter";
 import { Toaster } from "react-hot-toast";
+import { CartProvider } from "./components/ui/Cart";
 
 export const metadata: Metadata = {
   title: "Excellent Earning",
@@ -51,9 +52,11 @@ export default function RootLayout({
         className={`${inter.variable} ${urbanist.variable} ${dmSans.variable} ${spaceGrotesk.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="light" storageKey="excellent-earning-theme">
-          <ConditionalNavbar />
-          <main>{children}</main>
-          <ConditionalFooter />
+          <CartProvider>
+            <ConditionalNavbar />
+            <main>{children}</main>
+            <ConditionalFooter />
+          </CartProvider>
         </ThemeProvider>
         <Toaster position="top-center" reverseOrder={false} />
       </body>

@@ -11,8 +11,17 @@ import { NavbarProps } from "./Navbar.types";
 import DesktopMenu from "./DesktopMenu";
 import MobileMenu from "./MobileMenu";
 import { Hamburger } from "../Humberger";
-import Image from "next/image";
 import { NavbarConfig, DEFAULT_NAVBAR_CONFIG } from "@/app/lib/models/navbar";
+import { CartButton } from "../Cart";
+import Cart from "../Cart";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../DropdownMenu";
 
 export default function Navbar({
   config = {},
@@ -31,8 +40,12 @@ export default function Navbar({
   );
   const [isLoading, setIsLoading] = useState(true);
   const [hoveredMenuItem, setHoveredMenuItem] = useState<string | null>(null);
+  const [topNavbarVisible, setTopNavbarVisible] = useState(true);
   const pathname = usePathname();
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Constants for navbar positioning
+  const TOP_NAVBAR_HEIGHT = 64; // 16 * 4 = 64px (h-16)
 
   useEffect(() => {
     setMounted(true);
@@ -101,20 +114,37 @@ export default function Navbar({
     return [];
   }, [hoveredMenuItem, finalConfig]);
 
-  // Advanced scroll effect with throttling
+  // Enhanced scroll effect with TopNavbar coordination
   useEffect(() => {
     let ticking = false;
+    const TRANSITION_THRESHOLD = 30; // Match TopNavbar threshold exactly
 
     const handleScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
           const scrollTop = window.scrollY;
+
+          // Update scrolled state
           setIsScrolled(scrollTop > 10);
+
+          // Coordinate with TopNavbar visibility - exact same logic
+          if (scrollTop <= TRANSITION_THRESHOLD) {
+            setTopNavbarVisible(true);
+          } else {
+            setTopNavbarVisible(false);
+          }
+
           ticking = false;
         });
         ticking = true;
       }
     };
+
+    // Check initial scroll position
+    const initialScrollTop = window.scrollY;
+    if (initialScrollTop > 30) {
+      setTopNavbarVisible(false);
+    }
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -150,6 +180,12 @@ export default function Navbar({
     onConsultationClick?.();
     closeMobileMenu();
   }, [onConsultationClick, closeMobileMenu]);
+
+  // User account handler
+  const handleUserClick = useCallback(() => {
+    // Navigate to user account page or open login modal
+    window.location.href = "/login";
+  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -231,12 +267,31 @@ export default function Navbar({
     );
   }
 
+  // Calculate navbar position based on TopNavbar visibility
+  const getNavbarPosition = () => {
+    if (topNavbarVisible) {
+      // When TopNavbar is visible, position below it
+      return {
+        top: `${TOP_NAVBAR_HEIGHT}px`,
+        transform: "translateY(0)",
+        transition: "all 0.5s ease-out",
+      };
+    } else {
+      // When TopNavbar is hidden, move to top with smooth transition
+      return {
+        top: "0px",
+        transform: "translateY(0)",
+        transition: "all 0.5s ease-out",
+      };
+    }
+  };
+
   return (
     <>
       {/* Main Navigation Header */}
       <header
         className={`
-          fixed top-0 left-0 right-0 z-40 transition-all duration-300 ease-out
+          fixed left-0 right-0 z-40 transition-all duration-500 ease-out
           ${
             isScrolled
               ? "bg-background/95 backdrop-blur-md border-b border-border shadow-lg"
@@ -244,6 +299,7 @@ export default function Navbar({
           }
           ${className}
         `}
+        style={getNavbarPosition()}
       >
         <div className="container">
           {/* Mobile Navigation Bar */}
@@ -308,38 +364,54 @@ export default function Navbar({
                 </Button>
               )}
 
-              {/* Consultation CTA - Desktop */}
-              {finalConfig.showConsultation && (
-                <>
+              {/* Cart Icon - Mobile First */}
+              <CartButton
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full border border-border hover:bg-hover transition-all duration-200 hover:scale-105 active:scale-95"
+                showBadge={true}
+              />
+
+              {/* User Account - Mobile First */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
-                    variant="primary"
-                    size="xs"
-                    onClick={handleConsultationClick}
-                    className="sm:hidden whitespace-nowrap"
-                    rightIcon={<LucideIcons.ArrowUpRight className="size-5" />}
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-full border border-border hover:bg-hover transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer touch-manipulation"
+                    aria-label="User Account"
                   >
-                    Let&apos;s Talk
+                    <LucideIcons.User className="h-5 w-5" />
                   </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={handleConsultationClick}
-                    className="hidden sm:flex lg:hidden whitespace-nowrap"
-                    rightIcon={<LucideIcons.ArrowUpRight className="size-5" />}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40 sm:w-48">
+                  <DropdownMenuLabel className="font-semibold text-foreground text-sm sm:text-base">
+                    User Account
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="px-3 py-2 cursor-default">
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Welcome Guest
+                    </p>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleUserClick}
+                    className="cursor-pointer"
                   >
-                    Let&apos;s Talk
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="hidden lg:flex whitespace-nowrap"
-                    onClick={handleConsultationClick}
-                    rightIcon={<LucideIcons.ArrowUpRight className="size-5" />}
+                    <LucideIcons.LogIn className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                    Sign In
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => (window.location.href = "/register")}
+                    className="cursor-pointer"
                   >
-                    Let&apos;s Talk
-                  </Button>
-                </>
-              )}
+                    <LucideIcons.UserPlus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                    Sign Up
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               {/* Mobile Menu Button */}
               <div className="lg:hidden">
                 <Hamburger
@@ -374,7 +446,7 @@ export default function Navbar({
                   <Button
                     type="submit"
                     size="icon"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-full bg-accent hover:bg-accent-hover text-accent-foreground transition-all 
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-accent hover:bg-accent-hover text-accent-foreground transition-all 
                     duration-200 hover:scale-105"
                   >
                     <LucideIcons.ArrowUpRight className="h-4 w-4" />
@@ -394,8 +466,16 @@ export default function Navbar({
         onConsultationClick={handleConsultationClick}
       />
 
-      {/* Spacer for fixed header */}
-      <div className="h-16 lg:h-20" />
+      {/* Cart Component */}
+      <Cart />
+
+      {/* Dynamic Spacer for fixed header - adjusts based on TopNavbar visibility */}
+      <div
+        className="transition-all duration-500 ease-out"
+        style={{
+          height: topNavbarVisible ? "120px" : "80px", // 64px (TopNavbar) + 56px (MainNavbar) when visible, just 80px when hidden
+        }}
+      />
     </>
   );
 }
