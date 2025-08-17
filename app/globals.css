@@ -207,3 +207,51 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/*Best Offer Swiper */
+
+.products-swiper {
+  padding: 0 10px;
+}
+
+.swiper-button-prev-trending,
+.swiper-button-next-trending {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiper-button-prev-trending.swiper-button-disabled,
+.swiper-button-next-trending.swiper-button-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.swiper-pagination-trending .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: #d1d5db;
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.swiper-pagination-trending .swiper-pagination-bullet-active {
+  width: 32px;
+  height: 8px;
+  background: hsl(var(--primary));
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .swiper-button-prev-trending,
+  .swiper-button-next-trending {
+    width: 40px;
+    height: 40px;
+  }
+
+  .products-swiper {
+    padding: 0 16px;
+  }
+}
