@@ -13,181 +13,59 @@ import { useCart } from "@/app/components/ui/Cart";
 import { ProductCardProps } from "@/app/components/ui/ProductCard/data";
 import { CartItem } from "@/app/components/ui/Cart/CartProvider";
 import { Button } from "../../ui/Button";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
-// Type definitions
+// Type definitions from API
+interface TopViralProduct {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  originalPrice: number;
+  discount: number;
+  rating: number;
+  reviewCount: number;
+  category: string;
+  tags: string[];
+  image: string;
+  isNew: boolean;
+  isFeatured: boolean;
+  isBestSeller: boolean;
+  downloadCount: number;
+  fileSize: string;
+  format: string;
+  compatibility: string[];
+  features: string[];
+  createdAt: string;
+  updatedAt: string;
+  order: number;
+  status: "active" | "inactive" | "draft";
+}
+
 interface TopDealSection {
   id: string;
   title: string;
-  products: ProductCardProps[];
+  description?: string;
+  products: TopViralProduct[];
   viewAllLink: string;
+  status: "active" | "inactive";
+  order: number;
+  createdAt: string;
+  updatedAt: string;
 }
-
-// Top Deal Data - Production ready with real product information
-const topDealSections: TopDealSection[] = [
-  {
-    id: "trendingDeals",
-    title: "Top Viral Bundle",
-    viewAllLink: "/products/trending",
-    products: [
-      {
-        id: "trending-1",
-        title: "Premium Reels Bundle 2024",
-        description:
-          "Get access to 500+ high-quality reels templates for Instagram, TikTok, and YouTube Shorts. Perfect for influencers and content creators.",
-        price: 2999,
-        originalPrice: 5999,
-        discount: 50,
-        rating: 4.8,
-        reviewCount: 1247,
-        category: "Reels Bundle",
-        tags: ["Instagram", "TikTok", "YouTube Shorts", "Templates"],
-        image:
-          "https://sasitag.in/wp-content/uploads/2024/09/1000-Viral-Hooks-Reels-e1725331139794.jpg",
-        isNew: true,
-        isFeatured: true,
-        isBestSeller: true,
-        downloadCount: 15420,
-        fileSize: "2.5 GB",
-        format: "MP4, MOV",
-        compatibility: ["iOS", "Android", "Desktop"],
-        features: [
-          "500+ Templates",
-          "HD Quality",
-          "Easy Customization",
-          "Commercial License",
-        ],
-        createdAt: "2024-01-15",
-        updatedAt: "2024-01-20",
-      },
-      {
-        id: "trending-2",
-        title: "AI-Powered Reels Creator Pro",
-        description:
-          "Revolutionary AI technology that generates engaging reels automatically. Includes 1000+ AI-generated templates and smart editing tools.",
-        price: 4999,
-        originalPrice: 8999,
-        discount: 44,
-        rating: 4.9,
-        reviewCount: 892,
-        category: "AI Reels Bundle",
-        tags: ["AI Generated", "Automation", "Smart Editing", "Premium"],
-        image:
-          "https://sasitag.in/wp-content/uploads/2024/03/Free-CD-DVD-Storage-Box-Mockup-1-3-e1710910653195.jpg",
-        isBestSeller: true,
-        isFeatured: true,
-        downloadCount: 8930,
-        fileSize: "4.2 GB",
-        format: "MP4, AI Templates",
-        compatibility: ["All Platforms", "Cloud Sync"],
-        features: [
-          "AI Generation",
-          "1000+ Templates",
-          "Smart Analytics",
-          "Auto-Optimization",
-        ],
-        createdAt: "2024-01-10",
-        updatedAt: "2024-01-18",
-      },
-      {
-        id: "trending-3",
-        title: "AI Cartoon Character Bundle",
-        description:
-          "Create stunning AI-generated cartoon characters for your content. Includes character generator, poses, expressions, and animation tools.",
-        price: 3999,
-        originalPrice: 6999,
-        discount: 43,
-        rating: 4.7,
-        reviewCount: 1563,
-        category: "AI Cartoon Bundle",
-        tags: ["AI Generated", "Cartoon Characters", "Animation", "Creative"],
-        image:
-          "https://sasitag.in/wp-content/uploads/2024/10/Loveonly-ai-Reels-Bundle-e1728532040957.jpg",
-        isNew: true,
-        downloadCount: 12540,
-        fileSize: "3.8 GB",
-        format: "PNG, SVG, MP4",
-        compatibility: ["All Platforms", "Web App"],
-        features: [
-          "Character Generator",
-          "500+ Poses",
-          "Expression Library",
-          "Animation Tools",
-        ],
-        createdAt: "2024-01-12",
-        updatedAt: "2024-01-19",
-      },
-      {
-        id: "trending-4",
-        title: "Digital Marketing Templates Pack",
-        description:
-          "Complete collection of marketing templates including social media posts, email campaigns, and landing pages.",
-        price: 1999,
-        originalPrice: 3999,
-        discount: 50,
-        rating: 4.6,
-        reviewCount: 892,
-        category: "Templates",
-        tags: ["Marketing", "Social Media", "Email", "Landing Pages"],
-        image:
-          "https://sasitag.in/wp-content/uploads/2024/07/Viral-Movie-Reels-Bundle-1-e1720843122732.jpg",
-        downloadCount: 8920,
-        fileSize: "1.8 GB",
-        format: "PSD, AI, Figma",
-        compatibility: ["Adobe Suite", "Figma", "Sketch"],
-        features: [
-          "200+ Templates",
-          "Multiple Formats",
-          "Easy Customization",
-          "Commercial Use",
-        ],
-        createdAt: "2024-01-08",
-        updatedAt: "2024-01-16",
-      },
-      {
-        id: "trending-5",
-        title: "E-commerce Website Bundle",
-        description:
-          "Complete e-commerce solution with premium themes, plugins, and tools for building successful online stores.",
-        price: 5999,
-        originalPrice: 11999,
-        discount: 50,
-        rating: 4.9,
-        reviewCount: 2341,
-        category: "Web Development",
-        tags: ["E-commerce", "WordPress", "Themes", "Plugins"],
-        image:
-          "https://sasitag.in/wp-content/uploads/2024/09/1000-Viral-Hooks-Reels-e1725331139794.jpg",
-        isBestSeller: true,
-        downloadCount: 18750,
-        fileSize: "5.2 GB",
-        format: "WordPress, HTML, CSS",
-        compatibility: ["WordPress", "All Browsers", "Mobile Responsive"],
-        features: [
-          "10 Premium Themes",
-          "50+ Plugins",
-          "Payment Gateways",
-          "SEO Optimized",
-        ],
-        createdAt: "2024-01-05",
-        updatedAt: "2024-01-15",
-      },
-    ],
-  },
-];
 
 // Swiper configuration for different sections
 const swiperConfig = {
-  trendingDeals: {
+  default: {
     modules: [Navigation, Pagination, Autoplay],
     spaceBetween: 0,
     slidesPerView: 1,
     navigation: {
-      nextEl: ".swiper-button-next-trending",
-      prevEl: ".swiper-button-prev-trending",
+      nextEl: ".swiper-button-next-default",
+      prevEl: ".swiper-button-prev-default",
     },
     pagination: {
-      el: ".swiper-pagination-trending",
+      el: ".swiper-pagination-default",
       clickable: true,
       dynamicBullets: true,
     },
@@ -223,6 +101,38 @@ const swiperConfig = {
 const BestOffer: React.FC = () => {
   const { addItem, isItemInCart } = useCart();
   const swiperRef = useRef<any>(null);
+  const [sections, setSections] = useState<TopDealSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch data from CMS API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/top-viral-products");
+        const result = await response.json();
+
+        if (result.success) {
+          // Filter only active sections and sort by order
+          const activeSections = result.data
+            .filter((section: TopDealSection) => section.status === "active")
+            .sort((a: TopDealSection, b: TopDealSection) => a.order - b.order);
+
+          setSections(activeSections);
+        } else {
+          setError(result.error);
+        }
+      } catch (error) {
+        setError("Failed to fetch data");
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Handle add to cart with proper cart item conversion
   const handleAddToCart = (product: ProductCardProps) => {
@@ -252,11 +162,67 @@ const BestOffer: React.FC = () => {
     console.log("Quick view:", product.title);
   };
 
+  // Convert TopViralProduct to ProductCardProps
+  const convertToProductCardProps = (
+    product: TopViralProduct
+  ): ProductCardProps => ({
+    id: product.id,
+    title: product.title,
+    description: product.description,
+    price: product.price,
+    originalPrice: product.originalPrice,
+    discount: product.discount,
+    rating: product.rating,
+    reviewCount: product.reviewCount,
+    category: product.category,
+    tags: product.tags,
+    image: product.image || "https://via.placeholder.com/400x300?text=No+Image",
+    isNew: product.isNew,
+    isFeatured: product.isFeatured,
+    isBestSeller: product.isBestSeller,
+    downloadCount: product.downloadCount,
+    fileSize: product.fileSize,
+    format: product.format,
+    compatibility: product.compatibility,
+    features: product.features,
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt,
+  });
+
+  if (loading) {
+    return (
+      <section className="py-10">
+        <div className="container relative z-10">
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || sections.length === 0) {
+    return (
+      <section className="py-10">
+        <div className="container relative z-10">
+          <div className="text-center py-20">
+            <h3 className="text-2xl font-bold text-muted-foreground mb-4">
+              {error ? "Failed to load products" : "No products available"}
+            </h3>
+            <p className="text-muted-foreground">
+              {error || "Please check back later or contact support."}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-10">
       <div className="container relative z-10">
         {/* Top Deal Sections */}
-        {topDealSections.map((section, sectionIndex) => (
+        {sections.map((section, sectionIndex) => (
           <motion.div
             key={section.id}
             initial={{ opacity: 0, y: 30 }}
@@ -277,6 +243,17 @@ const BestOffer: React.FC = () => {
                 >
                   {section.title}
                 </motion.h3>
+                {section.description && (
+                  <motion.p
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="text-muted-foreground mt-2"
+                  >
+                    {section.description}
+                  </motion.p>
+                )}
               </div>
 
               <motion.div
@@ -302,46 +279,69 @@ const BestOffer: React.FC = () => {
             {/* Products Swiper */}
             <div className="relative">
               {/* Custom Navigation Buttons */}
-              <button className="swiper-button-prev-trending absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-background/90 backdrop-blur-sm hover:bg-background border border-border rounded-full shadow-lg transition-all duration-200 hover:scale-110">
+              <button
+                className={`swiper-button-prev-${section.id} absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-background/90 backdrop-blur-sm hover:bg-background border border-border rounded-full shadow-lg transition-all duration-200 hover:scale-110`}
+              >
                 <FaChevronLeft className="w-4 h-4 text-primary" />
               </button>
 
-              <button className="swiper-button-next-trending absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-background/90 backdrop-blur-sm hover:bg-background border border-border rounded-full shadow-lg transition-all duration-200 hover:scale-110">
+              <button
+                className={`swiper-button-next-${section.id} absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-background/90 backdrop-blur-sm hover:bg-background border border-border rounded-full shadow-lg transition-all duration-200 hover:scale-110`}
+              >
                 <FaChevronRight className="w-4 h-4 text-primary" />
               </button>
 
               {/* Swiper Container */}
               <Swiper
                 ref={swiperRef}
-                {...swiperConfig[section.id as keyof typeof swiperConfig]}
+                {...swiperConfig.default}
+                navigation={{
+                  nextEl: `.swiper-button-next-${section.id}`,
+                  prevEl: `.swiper-button-prev-${section.id}`,
+                }}
+                pagination={{
+                  el: `.swiper-pagination-${section.id}`,
+                  clickable: true,
+                  dynamicBullets: true,
+                }}
                 className="products-swiper"
               >
-                {section.products.map((product, index) => (
-                  <SwiperSlide key={product.id}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className="h-full px-2"
-                    >
-                      <div className="h-full">
-                        <ProductCard
-                          {...product}
-                          onAddToCart={handleAddToCart}
-                          onWishlist={handleWishlist}
-                          onQuickView={handleQuickView}
-                          variant="default"
-                          className="h-full"
-                        />
-                      </div>
-                    </motion.div>
-                  </SwiperSlide>
-                ))}
+                {section.products
+                  .filter(
+                    (product) =>
+                      product.status === "active" &&
+                      product.image &&
+                      product.image.trim() !== ""
+                  )
+                  .sort((a, b) => a.order - b.order)
+                  .map((product, index) => (
+                    <SwiperSlide key={product.id}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                        className="h-full px-2"
+                      >
+                        <div className="h-full">
+                          <ProductCard
+                            {...convertToProductCardProps(product)}
+                            onAddToCart={handleAddToCart}
+                            onWishlist={handleWishlist}
+                            onQuickView={handleQuickView}
+                            variant="default"
+                            className="h-full"
+                          />
+                        </div>
+                      </motion.div>
+                    </SwiperSlide>
+                  ))}
               </Swiper>
 
               {/* Custom Pagination */}
-              <div className="swiper-pagination-trending flex items-center justify-center gap-2 mt-6"></div>
+              <div
+                className={`swiper-pagination-${section.id} flex items-center justify-center gap-2 mt-6`}
+              ></div>
             </div>
           </motion.div>
         ))}

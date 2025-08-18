@@ -34,11 +34,10 @@ const navItems: NavItem[] = [
     name: "Home",
     icon: <LucideIcons.Home />,
     subItems: [
-      { name: "Primary Hero", path: "/admin/primary-hero" },
-      { name: "Secondary Hero", path: "/admin/secondary-hero" },
-      { name: "Hero Control", path: "/admin/hero-control" },
-      { name: "Team Members", path: "/admin/team-members" },
-      { name: "Services", path: "/admin/services", new: true },
+      { name: "Top Viral Products", path: "/admin/top-viral-products" },
+      { name: "Top Deals", path: "/admin/top-deals" },
+      { name: "Top Categories", path: "/admin/top-categories" },
+      { name: "Top Brands", path: "/admin/top-brands" },
     ],
   },
   {

@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import { ThemeProvider } from "../lib/theme-provider";
-import {
-  inter,
-  dmSans,
-  urbanist,
-  spaceGrotesk,
-} from "../lib/fonts";
+import { inter, dmSans, urbanist, spaceGrotesk } from "../lib/fonts";
 import { SidebarProvider } from "../context/SidebarContext";
 import AdminDashboardLayout from "./AdminDashboardLayout";
 
@@ -37,20 +32,6 @@ export default function AdminLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                const theme = localStorage.getItem('renderwise-theme') || 'light';
-                document.documentElement.classList.add(theme);
-              } catch (e) {
-                document.documentElement.classList.add('light');
-              }
-            `,
-          }}
-        />
-      </head>
       <body
         className={`${inter.variable} ${urbanist.variable} ${dmSans.variable} ${spaceGrotesk.variable} antialiased`}
       >
