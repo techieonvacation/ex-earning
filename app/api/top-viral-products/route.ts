@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { ObjectId } from "mongodb";
+import { getCollection } from "@/app/lib/mongodb";
 
 // Types
 export interface TopViralProduct {
+  _id?: string;
   id: string;
   title: string;
   description: string;
@@ -27,13 +28,15 @@ export interface TopViralProduct {
   updatedAt: string;
   order: number;
   status: "active" | "inactive" | "draft";
+  sectionId: string;
 }
 
 export interface TopDealSection {
+  _id?: string;
   id: string;
   title: string;
   description?: string;
-  products: TopViralProduct[];
+  products: string[]; // Array of product IDs
   viewAllLink: string;
   status: "active" | "inactive";
   order: number;
@@ -41,29 +44,25 @@ export interface TopDealSection {
   updatedAt: string;
 }
 
-// Data file path
-const dataFilePath = path.join(process.cwd(), "data", "top-viral-products.json");
+// MongoDB Collection Names
+const SECTIONS_COLLECTION = "top_viral_sections";
+const PRODUCTS_COLLECTION = "top_viral_products";
 
-// Ensure data directory exists
-async function ensureDataDirectory() {
-  const dataDir = path.dirname(dataFilePath);
-  try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
+// Generate unique ID
+function generateId(): string {
+  return `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// Read data from file
-async function readData(): Promise<TopDealSection[]> {
+// Initialize default data if collections are empty
+async function initializeDefaultData() {
   try {
-    await ensureDataDirectory();
-    const data = await fs.readFile(dataFilePath, "utf-8");
-    return JSON.parse(data);
-  } catch (error) {
-    // Return default data if file doesn't exist
-    return [
-      {
+    const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
+    const productsCollection = await getCollection(PRODUCTS_COLLECTION);
+    
+    const sectionsCount = await sectionsCollection.countDocuments();
+    
+    if (sectionsCount === 0) {
+      const defaultSection = {
         id: "trendingDeals",
         title: "Top Viral Bundle",
         description: "Featured trending products and bundles",
@@ -72,55 +71,80 @@ async function readData(): Promise<TopDealSection[]> {
         order: 1,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        products: [
-          {
-            id: "trending-1",
-            title: "Premium Reels Bundle 2024",
-            description: "Get access to 500+ high-quality reels templates for Instagram, TikTok, and YouTube Shorts. Perfect for influencers and content creators.",
-            price: 2999,
-            originalPrice: 5999,
-            discount: 50,
-            rating: 4.8,
-            reviewCount: 1247,
-            category: "Reels Bundle",
-            tags: ["Instagram", "TikTok", "YouTube Shorts", "Templates"],
-            image: "https://sasitag.in/wp-content/uploads/2024/09/1000-Viral-Hooks-Reels-e1725331139794.jpg",
-            isNew: true,
-            isFeatured: true,
-            isBestSeller: true,
-            downloadCount: 15420,
-            fileSize: "2.5 GB",
-            format: "MP4, MOV",
-            compatibility: ["iOS", "Android", "Desktop"],
-            features: ["500+ Templates", "HD Quality", "Easy Customization", "Commercial License"],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            order: 1,
-            status: "active"
-          }
-        ]
-      }
-    ];
+        products: []
+      };
+      
+      const sectionResult = await sectionsCollection.insertOne(defaultSection);
+      
+      const defaultProduct = {
+        id: "trending-1",
+        title: "Premium Reels Bundle 2024",
+        description: "Get access to 500+ high-quality reels templates for Instagram, TikTok, and YouTube Shorts. Perfect for influencers and content creators.",
+        price: 2999,
+        originalPrice: 5999,
+        discount: 50,
+        rating: 4.8,
+        reviewCount: 1247,
+        category: "Reels Bundle",
+        tags: ["Instagram", "TikTok", "YouTube Shorts", "Templates"],
+        image: "https://sasitag.in/wp-content/uploads/2024/09/1000-Viral-Hooks-Reels-e1725331139794.jpg",
+        isNew: true,
+        isFeatured: true,
+        isBestSeller: true,
+        downloadCount: 15420,
+        fileSize: "2.5 GB",
+        format: "MP4, MOV",
+        compatibility: ["iOS", "Android", "Desktop"],
+        features: ["500+ Templates", "HD Quality", "Easy Customization", "Commercial License"],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        order: 1,
+        status: "active",
+        sectionId: defaultSection.id
+      };
+      
+      await productsCollection.insertOne(defaultProduct);
+      
+      // Update section with product reference
+      await sectionsCollection.updateOne(
+        { _id: sectionResult.insertedId },
+        { $push: { products: defaultProduct.id } } as any 
+      );
+    }
+  } catch (error) {
+    console.error("Error initializing default data:", error);
   }
 }
 
-// Write data to file
-async function writeData(data: TopDealSection[]) {
-  await ensureDataDirectory();
-  await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
-}
-
-// Generate unique ID
-function generateId(): string {
-  return `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
-// GET - Fetch all sections
+// GET - Fetch all sections with their products
 export async function GET() {
   try {
-    const data = await readData();
-    return NextResponse.json({ success: true, data });
+    await initializeDefaultData();
+    
+    const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
+    const productsCollection = await getCollection(PRODUCTS_COLLECTION);
+    
+    // Get all sections
+    const sections = await sectionsCollection
+      .find({})
+      .sort({ order: 1 })
+      .toArray();
+    
+    // Get all products
+    const products = await productsCollection
+      .find({})
+      .sort({ order: 1 })
+      .toArray();
+    
+    // Map products to sections
+    const sectionsWithProducts = sections.map(section => ({
+      ...section,
+      products: products.filter(product => product.sectionId === section.id)
+    }));
+    
+    return NextResponse.json({ success: true, data: sectionsWithProducts });
   } catch (error) {
+    console.error("GET error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch data" },
       { status: 500 }
@@ -134,51 +158,67 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, sectionId, product, section } = body;
     
-    const data = await readData();
-    
     if (action === "createSection") {
-      const newSection: TopDealSection = {
+      const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
+      
+      const newSection = {
         id: generateId(),
         title: section.title,
         description: section.description || "",
         products: [],
         viewAllLink: section.viewAllLink,
         status: section.status || "active",
-        order: data.length + 1,
+        order: await sectionsCollection.countDocuments() + 1,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
       
-      data.push(newSection);
-      await writeData(data);
+      const result = await sectionsCollection.insertOne(newSection);
       
-      return NextResponse.json({ success: true, data: newSection });
+      return NextResponse.json({ 
+        success: true, 
+        data: { ...newSection, _id: result.insertedId } 
+      });
     }
     
     if (action === "createProduct") {
-      const sectionIndex = data.findIndex(s => s.id === sectionId);
-      if (sectionIndex === -1) {
+      const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
+      const productsCollection = await getCollection(PRODUCTS_COLLECTION);
+      
+      // Verify section exists
+      const sectionExists = await sectionsCollection.findOne({ id: sectionId });
+      if (!sectionExists) {
         return NextResponse.json(
           { success: false, error: "Section not found" },
           { status: 404 }
         );
       }
       
-      const newProduct: TopViralProduct = {
+      const newProduct = {
         id: generateId(),
         ...product,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        order: data[sectionIndex].products.length + 1,
-        status: product.status || "active"
+        order: await productsCollection.countDocuments({ sectionId }) + 1,
+        status: product.status || "active",
+        sectionId
       };
       
-      data[sectionIndex].products.push(newProduct);
-      data[sectionIndex].updatedAt = new Date().toISOString();
+      const result = await productsCollection.insertOne(newProduct);
       
-      await writeData(data);
+      // Update section's products array
+      await sectionsCollection.updateOne(
+        { id: sectionId },
+        { 
+          $push: { products: newProduct.id },
+          $set: { updatedAt: new Date().toISOString() }
+        }
+      );
       
-      return NextResponse.json({ success: true, data: newProduct });
+      return NextResponse.json({ 
+        success: true, 
+        data: { ...newProduct, _id: result.insertedId } 
+      });
     }
     
     return NextResponse.json(
@@ -186,6 +226,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
+    console.error("POST error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to create" },
       { status: 500 }
@@ -199,102 +240,97 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { action, sectionId, productId, updates } = body;
     
-    const data = await readData();
-    
     if (action === "updateSection") {
-      const sectionIndex = data.findIndex(s => s.id === sectionId);
-      if (sectionIndex === -1) {
+      const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
+      
+      const result = await sectionsCollection.updateOne(
+        { id: sectionId },
+        { 
+          $set: {
+            ...updates,
+            updatedAt: new Date().toISOString()
+          }
+        }
+      );
+      
+      if (result.matchedCount === 0) {
         return NextResponse.json(
           { success: false, error: "Section not found" },
           { status: 404 }
         );
       }
       
-      data[sectionIndex] = {
-        ...data[sectionIndex],
-        ...updates,
-        updatedAt: new Date().toISOString()
-      };
-      
-      await writeData(data);
-      
-      return NextResponse.json({ success: true, data: data[sectionIndex] });
+      const updatedSection = await sectionsCollection.findOne({ id: sectionId });
+      return NextResponse.json({ success: true, data: updatedSection });
     }
     
     if (action === "updateProduct") {
-      const sectionIndex = data.findIndex(s => s.id === sectionId);
-      if (sectionIndex === -1) {
-        return NextResponse.json(
-          { success: false, error: "Section not found" },
-          { status: 404 }
-        );
-      }
+      const productsCollection = await getCollection(PRODUCTS_COLLECTION);
+      const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
       
-      const productIndex = data[sectionIndex].products.findIndex(p => p.id === productId);
-      if (productIndex === -1) {
+      const result = await productsCollection.updateOne(
+        { id: productId, sectionId },
+        { 
+          $set: {
+            ...updates,
+            updatedAt: new Date().toISOString()
+          }
+        }
+      );
+      
+      if (result.matchedCount === 0) {
         return NextResponse.json(
           { success: false, error: "Product not found" },
           { status: 404 }
         );
       }
       
-      data[sectionIndex].products[productIndex] = {
-        ...data[sectionIndex].products[productIndex],
-        ...updates,
-        updatedAt: new Date().toISOString()
-      };
+      // Update section's updatedAt
+      await sectionsCollection.updateOne(
+        { id: sectionId },
+        { $set: { updatedAt: new Date().toISOString() } }
+      );
       
-      data[sectionIndex].updatedAt = new Date().toISOString();
-      
-      await writeData(data);
-      
-      return NextResponse.json({ 
-        success: true, 
-        data: data[sectionIndex].products[productIndex] 
-      });
+      const updatedProduct = await productsCollection.findOne({ id: productId });
+      return NextResponse.json({ success: true, data: updatedProduct });
     }
     
     if (action === "reorderProducts") {
-      const sectionIndex = data.findIndex(s => s.id === sectionId);
-      if (sectionIndex === -1) {
-        return NextResponse.json(
-          { success: false, error: "Section not found" },
-          { status: 404 }
+      const { productIds } = updates;
+      const productsCollection = await getCollection(PRODUCTS_COLLECTION);
+      
+      // Update order for each product
+      for (let i = 0; i < productIds.length; i++) {
+        await productsCollection.updateOne(
+          { id: productIds[i] },
+          { $set: { order: i + 1 } }
         );
       }
       
-      const { productIds } = updates;
-      const reorderedProducts = [];
-      
-      for (const productId of productIds) {
-        const product = data[sectionIndex].products.find(p => p.id === productId);
-        if (product) {
-          product.order = reorderedProducts.length + 1;
-          reorderedProducts.push(product);
-        }
-      }
-      
-      data[sectionIndex].products = reorderedProducts;
-      data[sectionIndex].updatedAt = new Date().toISOString();
-      
-      await writeData(data);
+      const reorderedProducts = await productsCollection
+        .find({ id: { $in: productIds } })
+        .sort({ order: 1 })
+        .toArray();
       
       return NextResponse.json({ success: true, data: reorderedProducts });
     }
     
     if (action === "reorderSections") {
       const { sectionIds } = updates;
-      const reorderedSections = [];
+      const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
       
-      for (const sectionId of sectionIds) {
-        const section = data.find(s => s.id === sectionId);
-        if (section) {
-          section.order = reorderedSections.length + 1;
-          reorderedSections.push(section);
-        }
+      // Update order for each section
+      for (let i = 0; i < sectionIds.length; i++) {
+        await sectionsCollection.updateOne(
+          { id: sectionIds[i] },
+          { $set: { order: i + 1 } }
+        );
       }
       
-      await writeData(reorderedSections);
+      const reorderedSections = await sectionsCollection
+        .find({ id: { $in: sectionIds } })
+        .sort({ order: 1 })
+        .toArray();
       
       return NextResponse.json({ success: true, data: reorderedSections });
     }
@@ -304,6 +340,7 @@ export async function PUT(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
+    console.error("PUT error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to update" },
       { status: 500 }
@@ -319,55 +356,76 @@ export async function DELETE(request: NextRequest) {
     const sectionId = searchParams.get("sectionId");
     const productId = searchParams.get("productId");
     
-    const data = await readData();
-    
     if (action === "deleteSection") {
-      const sectionIndex = data.findIndex(s => s.id === sectionId);
-      if (sectionIndex === -1) {
+      const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
+      const productsCollection = await getCollection(PRODUCTS_COLLECTION);
+      
+      // Delete all products in the section
+      await productsCollection.deleteMany({ sectionId });
+      
+      // Delete the section
+      const result = await sectionsCollection.deleteOne({ id: sectionId });
+      
+      if (result.deletedCount === 0) {
         return NextResponse.json(
           { success: false, error: "Section not found" },
           { status: 404 }
         );
       }
       
-      data.splice(sectionIndex, 1);
-      
       // Reorder remaining sections
-      data.forEach((section, index) => {
-        section.order = index + 1;
-      });
+      const remainingSections = await sectionsCollection
+        .find({})
+        .sort({ order: 1 })
+        .toArray();
       
-      await writeData(data);
+      for (let i = 0; i < remainingSections.length; i++) {
+        await sectionsCollection.updateOne(
+          { _id: remainingSections[i]._id },
+          { $set: { order: i + 1 } }
+        );
+      }
       
       return NextResponse.json({ success: true, message: "Section deleted" });
     }
     
     if (action === "deleteProduct") {
-      const sectionIndex = data.findIndex(s => s.id === sectionId);
-      if (sectionIndex === -1) {
-        return NextResponse.json(
-          { success: false, error: "Section not found" },
-          { status: 404 }
-        );
-      }
+      const productsCollection = await getCollection(PRODUCTS_COLLECTION);
+      const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
       
-      const productIndex = data[sectionIndex].products.findIndex(p => p.id === productId);
-      if (productIndex === -1) {
+      const result = await productsCollection.deleteOne({ 
+        id: productId, 
+        sectionId 
+      });
+      
+      if (result.deletedCount === 0) {
         return NextResponse.json(
           { success: false, error: "Product not found" },
           { status: 404 }
         );
       }
       
-      data[sectionIndex].products.splice(productIndex, 1);
-      data[sectionIndex].updatedAt = new Date().toISOString();
+      // Remove product ID from section's products array
+      await sectionsCollection.updateOne(
+        { id: sectionId },
+        { 
+          $pull: { products: productId } as any,
+          $set: { updatedAt: new Date().toISOString() }
+        }
+      );
       
-      // Reorder remaining products
-      data[sectionIndex].products.forEach((product, index) => {
-        product.order = index + 1;
-      });
+      // Reorder remaining products in the section
+      const remainingProducts = await productsCollection
+        .find({ sectionId })
+        .sort({ order: 1 })
+        .toArray();
       
-      await writeData(data);
+      for (let i = 0; i < remainingProducts.length; i++) {
+        await productsCollection.updateOne(
+          { _id: remainingProducts[i]._id },
+          { $set: { order: i + 1 } }
+        );
+      }
       
       return NextResponse.json({ success: true, message: "Product deleted" });
     }
@@ -377,6 +435,7 @@ export async function DELETE(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
+    console.error("DELETE error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete" },
       { status: 500 }
