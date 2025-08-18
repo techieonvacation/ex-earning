@@ -19,8 +19,6 @@ import { useRef } from "react";
 interface TopDealSection {
   id: string;
   title: string;
-  highlight: string;
-  subtitle: string;
   products: ProductCardProps[];
   viewAllLink: string;
 }
@@ -29,9 +27,7 @@ interface TopDealSection {
 const topDealSections: TopDealSection[] = [
   {
     id: "trendingDeals",
-    title: "Top Viral",
-    highlight: "Bundle",
-    subtitle: "Most popular products with amazing discounts",
+    title: "Top Viral Bundle",
     viewAllLink: "/products/trending",
     products: [
       {
@@ -224,7 +220,7 @@ const swiperConfig = {
   },
 };
 
-const TopDealComponents: React.FC = () => {
+const BestOffer: React.FC = () => {
   const { addItem, isItemInCart } = useCart();
   const swiperRef = useRef<any>(null);
 
@@ -267,7 +263,7 @@ const TopDealComponents: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: sectionIndex * 0.2 }}
-            className="mb-20 relative"
+            className="relative"
           >
             {/* Section Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-4">
@@ -277,20 +273,10 @@ const TopDealComponents: React.FC = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="title"
+                  className="text-3xl font-bold font-urbanist"
                 >
-                  {section.title}{" "}
-                  <span className="highlight">{section.highlight}</span>
+                  {section.title}
                 </motion.h3>
-                <motion.p
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="hidden sm:block text-muted-foreground text-sm md:text-base font-dm-sans"
-                >
-                  {section.subtitle}
-                </motion.p>
               </div>
 
               <motion.div
@@ -364,4 +350,4 @@ const TopDealComponents: React.FC = () => {
   );
 };
 
-export default TopDealComponents;
+export default BestOffer;
