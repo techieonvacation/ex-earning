@@ -195,10 +195,10 @@ const BestProduct: React.FC = () => {
     console.log("Add to wishlist:", product.title);
   };
 
-  // Handle quick view (placeholder for future implementation)
+  // Handle quick view - navigate to product details
   const handleQuickView = (product: ProductCardProps) => {
-    // TODO: Implement quick view functionality
-    console.log("Quick view:", product.title);
+    // Navigate to product details page
+    window.location.href = `/product/${product.id}`;
   };
 
   return (

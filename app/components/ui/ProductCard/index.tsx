@@ -248,10 +248,13 @@ const ProductCard: React.FC<ProductCardComponentProps> = ({
             <span className="text-xs text-primary font-medium">{category}</span>
           </div>
 
-          {/* Title */}
-          <h3 className="font-semibold text-card-foreground text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors duration-200">
-            {title}
-          </h3>
+                  {/* Title */}
+        <h3 
+          className="font-semibold text-card-foreground text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors duration-200 cursor-pointer"
+          onClick={() => window.location.href = `/product/${id}`}
+        >
+          {title}
+        </h3>
 
           {/* Rating */}
           <div className="flex items-center gap-2 mb-3">
@@ -384,7 +387,10 @@ const ProductCard: React.FC<ProductCardComponentProps> = ({
           </div>
 
           {/* Title */}
-          <h3 className="font-bold text-card-foreground text-xl line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-300">
+          <h3 
+            className="font-bold text-card-foreground text-xl line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-300 cursor-pointer"
+            onClick={() => window.location.href = `/product/${id}`}
+          >
             {title}
           </h3>
 
@@ -536,7 +542,10 @@ const ProductCard: React.FC<ProductCardComponentProps> = ({
         </div>
 
         {/* Title */}
-        <h3 className="font-bold font-urbanist text-card-foreground text-lg line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-200">
+        <h3 
+          className="font-bold font-urbanist text-card-foreground text-lg line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-200 cursor-pointer"
+          onClick={() => window.location.href = `/product/${id}`}
+        >
           {title}
         </h3>
 

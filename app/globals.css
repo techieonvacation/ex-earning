@@ -232,7 +232,7 @@ body {
 .swiper-pagination-trending .swiper-pagination-bullet {
   width: 8px;
   height: 8px;
-  background: #d1d5db;
+  background: hsl(var(--muted));
   opacity: 1;
   transition: all 0.3s ease;
 }
@@ -254,4 +254,14 @@ body {
   .products-swiper {
     padding: 0 16px;
   }
+}
+
+/* Scrollbar utilities */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
 }

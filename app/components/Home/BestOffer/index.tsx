@@ -14,6 +14,7 @@ import { ProductCardProps } from "@/app/components/ui/ProductCard/data";
 import { CartItem } from "@/app/components/ui/Cart/CartProvider";
 import { Button } from "../../ui/Button";
 import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 // Type definitions from API
 interface TopViralProduct {
@@ -100,6 +101,7 @@ const swiperConfig = {
 
 const BestOffer: React.FC = () => {
   const { addItem, isItemInCart } = useCart();
+  const router = useRouter();
   const swiperRef = useRef<any>(null);
   const [sections, setSections] = useState<TopDealSection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,10 +158,10 @@ const BestOffer: React.FC = () => {
     console.log("Add to wishlist:", product.title);
   };
 
-  // Handle quick view (placeholder for future implementation)
+  // Handle quick view - navigate to product details
   const handleQuickView = (product: ProductCardProps) => {
-    // TODO: Implement quick view functionality
-    console.log("Quick view:", product.title);
+    // Navigate to product details page using Next.js router
+    router.push(`/product/${product.id}`);
   };
 
   // Convert TopViralProduct to ProductCardProps
@@ -220,7 +222,7 @@ const BestOffer: React.FC = () => {
 
   return (
     <section className="py-10">
-      <div className="container relative z-10">
+      <div className="container relative z-10 space-y-10 lg:space-y-20">
         {/* Top Deal Sections */}
         {sections.map((section, sectionIndex) => (
           <motion.div
