@@ -243,11 +243,14 @@ export async function PUT(request: NextRequest) {
     if (action === "updateSection") {
       const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
       
+      // Filter out _id from updates to prevent MongoDB error
+      const { _id, ...safeUpdates } = updates;
+      
       const result = await sectionsCollection.updateOne(
         { id: sectionId },
         { 
           $set: {
-            ...updates,
+            ...safeUpdates,
             updatedAt: new Date().toISOString()
           }
         }
@@ -268,11 +271,14 @@ export async function PUT(request: NextRequest) {
       const productsCollection = await getCollection(PRODUCTS_COLLECTION);
       const sectionsCollection = await getCollection(SECTIONS_COLLECTION);
       
+      // Filter out _id from updates to prevent MongoDB error
+      const { _id, ...safeUpdates } = updates;
+      
       const result = await productsCollection.updateOne(
         { id: productId, sectionId },
         { 
           $set: {
-            ...updates,
+            ...safeUpdates,
             updatedAt: new Date().toISOString()
           }
         }
